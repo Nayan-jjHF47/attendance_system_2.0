@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Attendance System</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      background-color: #e0ffff; /* Light Cyan */
+      margin: 0;
+      padding: 0;
+      color: #333;
+    }
+
+    h1 {
+      text-align: center;
+      color: #fff;
+      background-color: #c71585; /* Violet-Red */
+      padding: 20px;
+      margin: 0;
+    }
+
+    h2 {
+      text-align: center;
+      margin: 10px 0;
+      color: #ff6666; /* Light Red */
+    }
+
+    table {
+      margin: 0 auto;
+      border-collapse: collapse;
+      width: 80%;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 15px;
+      text-align: center;
+    }
+
+    .present-button, .absent-button {
+      width: 100%;
+      height: 30px;
+      cursor: pointer;
+      border: 1px solid #000;
+      border-radius: 5px;
+      margin-bottom: 5px;
+    }
+
+    .present-button {
+      background-color: #e67e22;
+      color: #fff;
+    }
+
+    .absent-button {
+      background-color: #27ae60;
+      color: #fff;
+    }
+
+    .copy-button {
+      background-color: lime;
+      color: #fff;
+      cursor: pointer;
+      border: 1px solid #000;
+      border-radius: 5px;
+      padding: 5px 10px;
+    }
+
+    .present {
+      background-color: #e67e22;
+      color: #fff;
+    }
+
+    .absent {
+      background-color: #27ae60;
+      color: #fff;
+    }
+
+    .button {
+      width: 150px;
+      height: 30px;
+      cursor: pointer;
+    }
+
+    #result {
+      margin: 20px auto;
+      width: 80%;
+      border: 1px solid #ddd;
+      padding: 10px;
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    #subtitle {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    #datetime {
+      text-align: center;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Attendance System</h1>
+  <div id="subtitle">
+    <h2 style="color: #ff6666;">Computer Department - Second Year - 2024</h2>
+  </div>
+  <div>
+    <label for="rowInput">Enter the number of rows:</label>
+    <input type="number" id="rowInput" min="1" value="10">
+    <button onclick="generateTable()">Generate Table</button>
+  </div>
+  <table id="attendance"></table>
+  <div id="result">
+    <p id="total-present">Total Present: 0</p>
+    <p id="total-absent">Total Absent: 0</p>
+    <p id="absent-list">Absent Roll No: </p>
+    <button id="copy-absent" class="copy-button" onclick="copyAbsentRollNumbers()">Copy Absent Roll Numbers</button>
+  </div>
+  <div id="datetime">
+    <p>Date and Time: <span id="datetime-value"></span></p>
+  </div>
+  <script>
+    // Get the table element
+    let table = document.getElementById("attendance");
+
+    function generateTable() {
+      // Clear existing rows
+      table.innerHTML = "";
+
+      // Get the number of rows from the user input
+      let numRows = document.getElementById("rowInput").value;
+
+      // Create the table header
+      let headerRow = document.createElement("tr");
+      let headerRollNo = document.createElement("th");
+      headerRollNo.textContent = "Roll No";
+      headerRow.appendChild(headerRollNo);
+
+      let headerName = document.createElement("th");
+      headerName.textContent = "Student Name";
+      headerRow.appendChild(headerName);
+
+      let headerPresent = document.createElement("th");
+      headerPresent.textContent = "Present";
+      headerRow.appendChild(headerPresent);
+
+      let headerAbsent = document.createElement("th");
+      headerAbsent.textContent = "Absent";
+      headerRow.appendChild(headerAbsent);
+
+      table.appendChild(headerRow);
+
+      // Loop to generate rows
+      for (let i = 1; i <= numRows; i++) {
+        let row = document.createElement("tr");
+
+        let cellRollNo = document.createElement("td");
+        cellRollNo.textContent = i;
+        row.appendChild(cellRollNo);
+
+        let cellName = document.createElement("td");
+        let inputName = document.createElement("input");
+        inputName.type = "text";
+        inputName.placeholder = "Enter Name";
+        cellName.appendChild(inputName);
+        row.appendChild(cellName);
+
+        let cellPresent = document.createElement("td");
+        let buttonPresent = document.createElement("button");
+        buttonPresent.className = "button present-button";
+        buttonPresent.textContent = "Present";
+        buttonPresent.addEventListener("click", function() {
+          cellPresent.classList.toggle("present");
+          cellAbsent.classList.remove("absent");
+          updateResult();
+        });
+        cellPresent.appendChild(buttonPresent);
+        row.appendChild(cellPresent);
+
+        let cellAbsent = document.createElement("td");
+        let buttonAbsent = document.createElement("button");
+        buttonAbsent.className = "button absent-button";
+        buttonAbsent.textContent = "Absent";
+        buttonAbsent.addEventListener("click", function() {
+          cellAbsent.classList.toggle("absent");
+          cellPresent.classList.remove("present");
+          updateResult();
+        });
+        cellAbsent.appendChild(buttonAbsent);
+        row.appendChild(cellAbsent);
+
+        table.appendChild(row);
+      }
+
+      updateResult();
+    }
+
+    function updateResult() {
+      let present = 0;
+      let absent = 0;
+      let absentRollNo = [];
+
+      for (let i = 1; i < table.rows.length; i++) {
+        let row = table.rows[i];
+
+        if (row.cells[2].classList.contains("present")) {
+          present++;
+        } else if (row.cells[3].classList.contains("absent")) {
+          absent++;
+          let rollNo = row.cells[0].textContent;
+          absentRollNo.push(rollNo);
+        }
+      }
+
+      document.getElementById("total-present").textContent = "Total Present: " + present;
+      document.getElementById("total-absent").textContent = "Total Absent: " + absent;
+      document.getElementById("absent-list").textContent = "Absent Roll No: " + absentRollNo.join(", ");
+    }
+
+    function copyAbsentRollNumbers() {
+      let absentText = document.getElementById("absent-list").textContent.substring(14);
+      let textarea = document.createElement("textarea");
+      textarea.value = absentText;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textarea);
+      alert("Absent roll numbers copied to clipboard: " + absentText);
+    }
+  </script>
+</body>
+</html>
